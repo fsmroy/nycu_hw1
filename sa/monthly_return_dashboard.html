@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>0050 與臺灣加權指數月報酬率分析</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --panel: #fffaf2;
+      --panel-strong: #fffdf8;
+      --ink: #1f2933;
+      --muted: #52606d;
+      --accent: #b45309;
+      --accent-2: #0f766e;
+      --grid: #e8dcc7;
+      --shadow: 0 18px 40px rgba(66, 44, 12, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Noto Sans TC", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(180, 83, 9, 0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(15, 118, 110, 0.14), transparent 30%),
+        linear-gradient(180deg, #f8f3ea 0%, var(--bg) 100%);
+    }
+
+    .page {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(255, 250, 242, 0.98), rgba(248, 242, 229, 0.98));
+      border: 1px solid rgba(180, 83, 9, 0.12);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: 0.02em;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 900px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin: 22px 0 8px;
+    }
+
+    .kpi {
+      background: rgba(255, 253, 248, 0.85);
+      border: 1px solid rgba(82, 96, 109, 0.12);
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    .kpi .label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .kpi .value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      grid-column: span 12;
+      background: var(--panel);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(82, 96, 109, 0.12);
+    }
+
+    .card.half {
+      grid-column: span 6;
+    }
+
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .card p {
+      margin: 0 0 16px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .chart {
+      min-height: 380px;
+    }
+
+    .insight-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .insight-item {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: var(--panel-strong);
+      border: 1px solid rgba(180, 83, 9, 0.12);
+    }
+
+    .insight-item strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .notes {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(15, 118, 110, 0.08);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 900px) {
+      .card.half {
+        grid-column: span 12;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <h1>0050 與臺灣加權指數月報酬率分析</h1>
+      <p>
+        這份儀表板以月報酬率為主，從時間序列、分布、箱型圖、共同變動與類別統計五個角度比較 0050 與臺灣加權指數。
+        月報酬率公式為（本月月底價格 − 上月月底價格）／上月月底價格。
+      </p>
+      <div class="kpis" id="kpis"></div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>月報酬率隨時間變化</h2>
+        <p>折線圖用來觀察波動較大的月份，以及是否出現連續上漲或連續下跌的市場階段。</p>
+        <div id="lineChart" class="chart"></div>
+        <div id="topMoves" class="insight-list"></div>
+        <div class="notes" id="eventNotes"></div>
+      </article>
+
+      <article class="card half">
+        <h2>單一資產月報酬率分布</h2>
+        <p>直方圖用來看 0050 的月報酬率大多落在哪些區間，以及是否存在偏態或肥尾。</p>
+        <div id="hist0050" class="chart"></div>
+      </article>
+
+      <article class="card half">
+        <h2>單一資產月報酬率分布</h2>
+        <p>直方圖用來看臺灣加權指數的月報酬率分布，與 0050 的波動型態相互對照。</p>
+        <div id="histIndex" class="chart"></div>
+      </article>
+
+      <article class="card half">
+        <h2>兩個資產的分布比較</h2>
+        <p>箱型圖比較中位數、四分位距與極端值，可快速看出誰的尾部風險更大。</p>
+        <div id="boxChart" class="chart"></div>
+      </article>
+
+      <article class="card half">
+        <h2>兩個資產的共同變動</h2>
+        <p>散佈圖顯示兩者是否同漲同跌，並搭配相關係數判斷同步性強弱。</p>
+        <div id="scatterChart" class="chart"></div>
+      </article>
+
+      <article class="card">
+        <h2>類別資料觀察</h2>
+        <p>將月報酬率依正報酬、負報酬、近乎持平三類整理成長條圖，比圓餅圖更適合比較頻數差異。</p>
+        <div id="barChart" class="chart"></div>
+      </article>
+    </section>
+  </div>
+
+  <script>
+    const csvText = `日期,0050月報酬率,臺灣加權指數月報酬率
+2018/1/31,,
+2018/2/27,-0.026938,-0.025966
+2018/3/30,0.005828,0.008391
+2018/4/30,-0.034283,-0.022770
+2018/5/31,0.009500,0.020368
+2018/6/29,0.008420,-0.003499
+2018/7/31,0.050589,0.020356
+2018/8/31,0.016363,0.000582
+2018/9/28,-0.000460,-0.005206
+2018/10/31,-0.107685,-0.109411
+2018/11/30,-0.010315,0.008763
+2018/12/28,-0.016154,-0.016244
+2019/1/30,-0.015360,0.021059
+2019/2/27,0.044110,0.046003
+2019/3/29,0.019578,0.024244
+2019/4/30,0.045983,0.030701
+2019/5/31,-0.052657,-0.042784
+2019/6/28,0.031617,0.022131
+2019/7/31,0.023233,0.008665
+2019/8/30,-0.011594,-0.019010
+2019/9/27,0.033724,0.019931
+2019/10/31,0.064775,0.048850
+2019/11/29,0.015986,0.011521
+2019/12/31,0.059441,0.044177
+2020/1/31,-0.072195,-0.041847
+2020/2/27,-0.014673,-0.017654
+2020/3/31,-0.140794,-0.140284
+2020/4/30,0.122899,0.132269
+2020/5/29,-0.012629,-0.004547
+2020/6/30,0.064898,0.062061
+2020/7/31,0.154359,0.089798
+2020/8/31,-0.019268,-0.005792
+2020/9/30,0.011788,-0.006023
+2020/10/30,0.000000,0.002455
+2020/11/30,0.100194,0.093776
+2020/12/31,0.078715,0.073573
+2021/1/29,0.048757,0.027543
+2021/2/26,0.040562,0.053869
+2021/3/31,0.010195,0.029920
+2021/4/29,0.043336,0.069108
+2021/5/31,-0.024751,-0.028362
+2021/6/30,0.013419,0.040252
+2021/7/30,-0.021013,-0.028614
+2021/8/31,0.031755,0.014082
+2021/9/30,-0.023653,-0.031762
+2021/10/29,-0.009048,0.003108
+2021/11/30,0.016200,0.025922
+2021/12/30,0.054493,0.045392
+2022/1/26,-0.027213,-0.029883
+2022/2/25,-0.021758,-0.001257
+2022/3/31,-0.002600,0.002339
+2022/4/29,-0.067767,-0.062243
+2022/5/31,0.008077,0.012993
+2022/6/30,-0.107858,-0.117924
+2022/7/29,0.018998,0.011759
+2022/8/31,-0.003390,0.006358
+2022/9/30,-0.120408,-0.110686
+2022/10/31,-0.042537,-0.035370
+2022/11/30,0.174879,0.149022
+2022/12/30,-0.052939,-0.049858
+2023/1/31,0.073684,0.079752
+2023/2/24,0.004057,0.015630
+2023/3/31,0.023569,0.023496
+2023/4/28,-0.034539,-0.018205
+2023/5/31,0.074617,0.064174
+2023/6/30,0.023462,0.020302
+2023/7/31,-0.002478,0.013590
+2023/8/31,-0.024224,-0.029799
+2023/9/28,-0.024188,-0.016879
+2023/10/31,-0.012068,-0.021553
+2023/11/30,0.084186,0.089529
+2023/12/29,0.031060,0.028505
+2024/1/31,-0.007974,-0.002301
+2024/2/29,0.066687,0.060214
+2024/3/29,0.101033,0.070000
+2024/4/30,0.002788,0.005033
+2024/5/31,0.049039,0.038125
+2024/6/28,0.123133,0.087750
+2024/7/31,-0.030036,-0.036162
+2024/8/30,0.002875,0.003096
+2024/9/30,0.014336,-0.001956
+2024/10/30,0.042618,0.026812
+2024/11/29,-0.023775,-0.024449
+2024/12/31,0.045503,0.034704
+2025/1/22,0.028402,0.021285
+2025/2/27,-0.043910,-0.020073
+2025/3/31,-0.102452,-0.102254
+2025/4/30,-0.024080,-0.022269
+2025/5/29,0.066192,0.054968
+2025/6/30,0.076101,0.042568
+2025/7/31,0.065964,0.057805
+2025/8/29,0.018429,0.029333
+2025/9/30,0.100952,0.065507
+2025/10/31,0.120242,0.093445
+2025/11/28,-0.037066,-0.021495
+2025/12/31,0.052125,0.048400
+2026/1/30,0.106707,0.107036
+2026/2/26,0.117769,0.104502
+2026/3/31,-0.108441,-0.104237
+2026/4/30,0.250864,0.227079
+2026/5/29,0.164641,0.149160
+2026/6/30,0.022770,0.031140`;
+
+    const rows = csvText.trim().split('\n').slice(1).map((line) => {
+      const [date, etf, index] = line.split(',');
+      return {
+        date,
+        etf: etf ? Number(etf) : null,
+        index: index ? Number(index) : null,
+      };
+    }).filter((row) => row.etf !== null && row.index !== null);
+
+    const dates = rows.map((row) => row.date);
+    const etfReturns = rows.map((row) => row.etf);
+    const indexReturns = rows.map((row) => row.index);
+
+    const theme = {
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: '#fffdf8',
+      font: { family: 'Segoe UI, Noto Sans TC, sans-serif', color: '#1f2933' },
+      margin: { l: 55, r: 20, t: 24, b: 50 },
+      xaxis: { gridcolor: '#e8dcc7', zerolinecolor: '#d4c1a1' },
+      yaxis: { gridcolor: '#e8dcc7', zerolinecolor: '#d4c1a1', tickformat: '.0%' },
+    };
+
+    function formatPct(value, digits = 2) {
+      return `${(value * 100).toFixed(digits)}%`;
+    }
+
+    function mean(values) {
+      return values.reduce((sum, value) => sum + value, 0) / values.length;
+    }
+
+    function correlation(xs, ys) {
+      const xMean = mean(xs);
+      const yMean = mean(ys);
+      const numerator = xs.reduce((sum, x, i) => sum + ((x - xMean) * (ys[i] - yMean)), 0);
+      const xDen = Math.sqrt(xs.reduce((sum, x) => sum + ((x - xMean) ** 2), 0));
+      const yDen = Math.sqrt(ys.reduce((sum, y) => sum + ((y - yMean) ** 2), 0));
+      return numerator / (xDen * yDen);
+    }
+
+    function quantile(sorted, q) {
+      const pos = (sorted.length - 1) * q;
+      const base = Math.floor(pos);
+      const rest = pos - base;
+      if (sorted[base + 1] !== undefined) {
+        return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+      }
+      return sorted[base];
+    }
+
+    function stats(values) {
+      const sorted = [...values].sort((a, b) => a - b);
+      return {
+        min: sorted[0],
+        q1: quantile(sorted, 0.25),
+        median: quantile(sorted, 0.5),
+        q3: quantile(sorted, 0.75),
+        max: sorted[sorted.length - 1],
+        avg: mean(values),
+      };
+    }
+
+    function signCounts(values) {
+      return {
+        正報酬: values.filter((value) => value > 0.001).length,
+        負報酬: values.filter((value) => value < -0.001).length,
+        近乎持平: values.filter((value) => value >= -0.001 && value <= 0.001).length,
+      };
+    }
+
+    function topAbsoluteMoves(label, values) {
+      return values
+        .map((value, index) => ({ label, date: dates[index], value, abs: Math.abs(value) }))
+        .sort((a, b) => b.abs - a.abs)
+        .slice(0, 3);
+    }
+
+    const corr = correlation(etfReturns, indexReturns);
+    const etfStats = stats(etfReturns);
+    const indexStats = stats(indexReturns);
+    const etfSigns = signCounts(etfReturns);
+    const indexSigns = signCounts(indexReturns);
+    const biggestMoves = [...topAbsoluteMoves('0050', etfReturns), ...topAbsoluteMoves('臺灣加權指數', indexReturns)]
+      .sort((a, b) => b.abs - a.abs)
+      .slice(0, 6);
+
+    const kpis = [
+      { label: '有效月份', value: `${rows.length} 個月` },
+      { label: '相關係數', value: corr.toFixed(3) },
+      { label: '0050 平均月報酬', value: formatPct(etfStats.avg) },
+      { label: '加權指數平均月報酬', value: formatPct(indexStats.avg) },
+      { label: '0050 最大單月漲幅', value: formatPct(etfStats.max) },
+      { label: '0050 最大單月跌幅', value: formatPct(etfStats.min) },
+    ];
+
+    document.getElementById('kpis').innerHTML = kpis.map((item) => `
+      <div class="kpi">
+        <div class="label">${item.label}</div>
+        <div class="value">${item.value}</div>
+      </div>
+    `).join('');
+
+    document.getElementById('topMoves').innerHTML = biggestMoves.map((item) => `
+      <div class="insight-item">
+        <strong>${item.label} ${item.date}</strong>
+        月報酬率 ${formatPct(item.value)}
+      </div>
+    `).join('');
+
+    document.getElementById('eventNotes').innerHTML = [
+      '2020/3 與 2020/4 出現明顯急跌急彈，對應新冠疫情初期的市場恐慌與後續反彈。',
+      '2022/6、2022/9 的負報酬較大，反映升息與景氣放緩壓力。',
+      '2025/3 到 2025/4 以及 2026/3 到 2026/4 的連續大幅波動，代表市場進入高震盪階段。'
+    ].map((text) => `<div>${text}</div>`).join('');
+
+    Plotly.newPlot('lineChart', [
+      {
+        x: dates,
+        y: etfReturns,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: '0050月報酬率',
+        line: { color: '#b45309', width: 3 },
+        marker: { size: 6 },
+        hovertemplate: '日期: %{x}<br>0050: %{y:.2%}<extra></extra>'
+      },
+      {
+        x: dates,
+        y: indexReturns,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: '臺灣加權指數月報酬率',
+        line: { color: '#0f766e', width: 3 },
+        marker: { size: 6 },
+        hovertemplate: '日期: %{x}<br>加權指數: %{y:.2%}<extra></extra>'
+      }
+    ], {
+      ...theme,
+      legend: { orientation: 'h', y: 1.1 },
+      yaxis: { ...theme.yaxis, title: '月報酬率' },
+      xaxis: { ...theme.xaxis, title: '月份', tickangle: -35 },
+      annotations: biggestMoves.slice(0, 4).map((item) => ({
+        x: item.date,
+        y: item.label === '0050' ? rows.find((row) => row.date === item.date).etf : rows.find((row) => row.date === item.date).index,
+        text: `${item.label}<br>${formatPct(item.value)}`,
+        showarrow: true,
+        arrowcolor: '#52606d',
+        ax: 0,
+        ay: item.value > 0 ? -38 : 38,
+        bgcolor: 'rgba(255,250,242,0.95)',
+        bordercolor: '#d4c1a1'
+      }))
+    }, { responsive: true });
+
+    Plotly.newPlot('hist0050', [{
+      x: etfReturns,
+      type: 'histogram',
+      name: '0050',
+      marker: { color: '#b45309', line: { color: '#fffaf2', width: 1 } },
+      hovertemplate: '區間中心: %{x:.2%}<br>次數: %{y}<extra></extra>'
+    }], {
+      ...theme,
+      xaxis: { ...theme.xaxis, title: '0050 月報酬率', tickformat: '.0%' },
+      yaxis: { ...theme.yaxis, title: '月份數', tickformat: undefined }
+    }, { responsive: true });
+
+    Plotly.newPlot('histIndex', [{
+      x: indexReturns,
+      type: 'histogram',
+      name: '臺灣加權指數',
+      marker: { color: '#0f766e', line: { color: '#fffaf2', width: 1 } },
+      hovertemplate: '區間中心: %{x:.2%}<br>次數: %{y}<extra></extra>'
+    }], {
+      ...theme,
+      xaxis: { ...theme.xaxis, title: '臺灣加權指數月報酬率', tickformat: '.0%' },
+      yaxis: { ...theme.yaxis, title: '月份數', tickformat: undefined }
+    }, { responsive: true });
+
+    Plotly.newPlot('boxChart', [
+      {
+        y: etfReturns,
+        type: 'box',
+        name: '0050',
+        boxpoints: 'outliers',
+        marker: { color: '#b45309' },
+        line: { color: '#b45309' },
+        hovertemplate: '0050: %{y:.2%}<extra></extra>'
+      },
+      {
+        y: indexReturns,
+        type: 'box',
+        name: '臺灣加權指數',
+        boxpoints: 'outliers',
+        marker: { color: '#0f766e' },
+        line: { color: '#0f766e' },
+        hovertemplate: '加權指數: %{y:.2%}<extra></extra>'
+      }
+    ], {
+      ...theme,
+      yaxis: { ...theme.yaxis, title: '月報酬率' },
+      xaxis: { ...theme.xaxis, title: '資產' }
+    }, { responsive: true });
+
+    Plotly.newPlot('scatterChart', [{
+      x: etfReturns,
+      y: indexReturns,
+      type: 'scatter',
+      mode: 'markers',
+      marker: {
+        size: 10,
+        color: dates.map((_, index) => index),
+        colorscale: [[0, '#b45309'], [1, '#0f766e']],
+        opacity: 0.75,
+        line: { width: 0.5, color: '#fffaf2' }
+      },
+      text: dates,
+      hovertemplate: '日期: %{text}<br>0050: %{x:.2%}<br>加權指數: %{y:.2%}<extra></extra>'
+    }], {
+      ...theme,
+      xaxis: { ...theme.xaxis, title: '0050 月報酬率', tickformat: '.0%' },
+      yaxis: { ...theme.yaxis, title: '臺灣加權指數月報酬率' },
+      annotations: [{
+        xref: 'paper',
+        yref: 'paper',
+        x: 0.02,
+        y: 0.98,
+        text: `相關係數: ${corr.toFixed(3)}`,
+        showarrow: false,
+        bgcolor: 'rgba(255,250,242,0.95)',
+        bordercolor: '#d4c1a1',
+        borderwidth: 1,
+        font: { size: 14 }
+      }],
+      shapes: [
+        { type: 'line', x0: Math.min(...etfReturns), x1: Math.max(...etfReturns), y0: 0, y1: 0, line: { color: '#cbd2d9', dash: 'dot' } },
+        { type: 'line', x0: 0, x1: 0, y0: Math.min(...indexReturns), y1: Math.max(...indexReturns), line: { color: '#cbd2d9', dash: 'dot' } }
+      ]
+    }, { responsive: true });
+
+    Plotly.newPlot('barChart', [
+      {
+        x: Object.keys(etfSigns),
+        y: Object.values(etfSigns),
+        type: 'bar',
+        name: '0050',
+        marker: { color: '#b45309' },
+        hovertemplate: '0050 %{x}: %{y} 個月<extra></extra>'
+      },
+      {
+        x: Object.keys(indexSigns),
+        y: Object.values(indexSigns),
+        type: 'bar',
+        name: '臺灣加權指數',
+        marker: { color: '#0f766e' },
+        hovertemplate: '加權指數 %{x}: %{y} 個月<extra></extra>'
+      }
+    ], {
+      ...theme,
+      barmode: 'group',
+      xaxis: { ...theme.xaxis, title: '月報酬率類別' },
+      yaxis: { ...theme.yaxis, title: '月份數', tickformat: undefined }
+    }, { responsive: true });
+  </script>
+</body>
+</html>
