@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>0050 與臺灣加權指數月報酬率分析報告</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root {
+      --bg: #f3efe7;
+      --paper: rgba(255, 252, 247, 0.94);
+      --paper-strong: #fffdf9;
+      --ink: #1e293b;
+      --muted: #526071;
+      --accent: #9a3412;
+      --accent-soft: rgba(154, 52, 18, 0.12);
+      --accent-2: #0f766e;
+      --accent-2-soft: rgba(15, 118, 110, 0.12);
+      --line: rgba(82, 96, 113, 0.16);
+      --shadow: 0 18px 46px rgba(46, 36, 24, 0.1);
+      --radius: 28px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "IBM Plex Sans TC", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(154, 52, 18, 0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(15, 118, 110, 0.16), transparent 30%),
+        linear-gradient(180deg, #f8f4ed 0%, var(--bg) 100%);
+    }
+
+    .page {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(255, 250, 244, 0.98), rgba(248, 242, 232, 0.98));
+      border: 1px solid rgba(154, 52, 18, 0.14);
+      border-radius: 36px;
+      padding: 30px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -90px;
+      top: -90px;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(15, 118, 110, 0.14) 0%, rgba(15, 118, 110, 0) 72%);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: "Noto Serif TC", serif;
+      letter-spacing: 0.01em;
+    }
+
+    .hero h1 {
+      margin: 16px 0 14px;
+      font-size: clamp(30px, 4.2vw, 50px);
+      line-height: 1.18;
+      max-width: 900px;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 930px;
+      line-height: 1.85;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .hero-meta,
+    .kpis,
+    .highlights,
+    .definition-grid,
+    .processing-grid,
+    .chart-grid,
+    .summary-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .hero-meta {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      margin: 24px 0 10px;
+    }
+
+    .meta-item,
+    .kpi,
+    .highlight,
+    .mini-card,
+    .note,
+    .stat-callout {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 16px 18px;
+    }
+
+    .meta-item .label,
+    .kpi .label,
+    .mini-card .label,
+    .stat-callout .label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .meta-item .value,
+    .kpi .value,
+    .stat-callout .value {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .kpis {
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      margin-top: 20px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .panel {
+      grid-column: span 12;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    .panel.split {
+      grid-column: span 6;
+    }
+
+    .panel h2 {
+      margin: 0 0 8px;
+      font-size: 26px;
+    }
+
+    .panel .section-intro {
+      margin: 0 0 18px;
+      line-height: 1.8;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .definition-grid,
+    .processing-grid,
+    .summary-grid {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .highlight {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 249, 242, 0.86));
+    }
+
+    .highlight strong,
+    .note strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .highlight p,
+    .note p,
+    .mini-card p,
+    .stat-callout p {
+      margin: 0;
+      line-height: 1.75;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    th,
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(82, 96, 113, 0.12);
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    th {
+      background: rgba(154, 52, 18, 0.08);
+      color: var(--ink);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .table-caption {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .chart-grid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .chart-card {
+      grid-column: span 12;
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 18px;
+    }
+
+    .chart-card.half {
+      grid-column: span 6;
+    }
+
+    .chart-card h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .chart-card p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 14px;
+    }
+
+    .chart {
+      min-height: 380px;
+    }
+
+    .chart.tall {
+      min-height: 420px;
+    }
+
+    .notes {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .note {
+      background: linear-gradient(180deg, rgba(15, 118, 110, 0.08), rgba(15, 118, 110, 0.03));
+    }
+
+    .narrative {
+      line-height: 1.95;
+      font-size: 15px;
+      color: var(--ink);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(246, 241, 232, 0.9));
+      border-radius: 24px;
+      border: 1px solid rgba(154, 52, 18, 0.14);
+      padding: 20px 22px;
+    }
+
+    .narrative p {
+      margin: 0 0 12px;
+    }
+
+    .narrative p:last-child {
+      margin-bottom: 0;
+    }
+
+    .footnote {
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .accent {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .accent-2 {
+      color: var(--accent-2);
+      font-weight: 700;
+    }
+
+    @media (max-width: 1120px) {
+      .panel.split,
+      .chart-card.half {
+        grid-column: span 12;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        padding: 18px 14px 36px;
+      }
+
+      .hero,
+      .panel {
+        padding: 20px;
+        border-radius: 24px;
+      }
+
+      .hero h1 {
+        font-size: 30px;
+      }
+
+      table {
+        min-width: 640px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="eyebrow">Chapter 5 Report Layout</div>
+      <h1>0050 與臺灣加權指數月報酬率分析報告</h1>
+      <p>
+        本頁依據既有整理資料，將「資料來源與變數定義、資料整理過程、圖表呈現、描述統計量、相關係數分析、管理或投資意義」整合為單一報告頁。
+        依作業要求，所有比較均以月報酬率、波動與共同變動為主，不直接以價格高低做結論，文字也維持「根據本期間資料」的謹慎語氣。
+      </p>
+      <div class="hero-meta" id="heroMeta"></div>
+      <div class="kpis" id="kpis"></div>
+    </header>
+
+    <main class="layout">
+      <section class="panel" id="section1">
+        <h2>1. 資料來源與變數定義</h2>
+        <p class="section-intro">
+          這一節說明資料來源、分析期間、有效樣本數，以及本報告採用的主要變數定義。兩個資產分別為元大台灣 50 ETF 與臺灣加權指數，屬性不同，因此比較核心放在報酬率與風險特徵，而非價格水準。
+        </p>
+        <div class="definition-grid" id="sourceCards"></div>
+        <div class="table-wrap" style="margin-top: 18px;">
+          <table>
+            <thead>
+              <tr>
+                <th>變數</th>
+                <th>定義</th>
+                <th>本報告用途</th>
+              </tr>
+            </thead>
+            <tbody id="definitionTable"></tbody>
+          </table>
+        </div>
+        <p class="table-caption" id="sourceCaption"></p>
+      </section>
+
+      <section class="panel" id="section2">
+        <h2>2. 資料整理過程</h2>
+        <p class="section-intro">
+          本報告以每月最後一個交易日收盤價整理為月資料，再依前後月價格計算月報酬率。為避免把缺少前期基準值的資料誤納入統計，沒有前一個月底價格的月份不會計入月報酬率分析。
+        </p>
+        <div class="processing-grid" id="processingCards"></div>
+        <div class="table-wrap" style="margin-top: 18px;">
+          <table>
+            <thead>
+              <tr>
+                <th>日期</th>
+                <th>0050 月底價格</th>
+                <th>臺灣加權指數月底價格</th>
+                <th>0050 月報酬率</th>
+                <th>臺灣加權指數月報酬率</th>
+              </tr>
+            </thead>
+            <tbody id="previewTable"></tbody>
+          </table>
+        </div>
+        <p class="table-caption">表格僅示範整理後資料前 5 列；完整分析以全部有效月份進行。</p>
+      </section>
+
+      <section class="panel" id="section3">
+        <h2>3. 第二章：資料表與圖表呈現</h2>
+        <p class="section-intro">
+          依作業要求，本頁提供次數分配表、月報酬率折線圖、直方圖、箱型圖與散佈圖。圖表目的在於協助辨識典型波動區間、極端月份與兩資產共同變動情形。
+        </p>
+        <div class="chart-grid">
+          <article class="chart-card">
+            <h3>月報酬率折線圖</h3>
+            <p>折線圖用來觀察各月份漲跌循環、同步性與市場劇烈波動區段。</p>
+            <div id="lineChart" class="chart tall"></div>
+          </article>
+
+          <article class="chart-card half">
+            <h3>0050 月報酬率次數分配表</h3>
+            <p>以 Sturges 法則決定組數，整理 0050 月報酬率的組距、次數、相對次數與累積百分比。</p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>組距</th>
+                    <th>次數</th>
+                    <th>相對次數</th>
+                    <th>累積百分比</th>
+                  </tr>
+                </thead>
+                <tbody id="freqTable"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="chart-card half">
+            <h3>月報酬率直方圖</h3>
+            <p>直方圖呈現兩個資產的月報酬率分布，方便比較集中區間與尾端風險。</p>
+            <div id="histChart" class="chart"></div>
+          </article>
+
+          <article class="chart-card half">
+            <h3>兩資產箱型圖</h3>
+            <p>箱型圖比較中位數、四分位距與異常值，適合觀察哪一個資產的波動較大。</p>
+            <div id="boxChart" class="chart"></div>
+          </article>
+
+          <article class="chart-card half">
+            <h3>月報酬率散佈圖</h3>
+            <p>散佈圖與相關係數搭配使用，用來描述共同變動方向與強弱，但不推論因果。</p>
+            <div id="scatterChart" class="chart"></div>
+          </article>
+        </div>
+        <div class="notes" id="chartNotes"></div>
+      </section>
+
+      <section class="panel split" id="section4">
+        <h2>4. 第三章：描述統計量</h2>
+        <p class="section-intro">
+          下表依月報酬率分別計算算術平均數、中位數、標準差、四分位數、全距、幾何平均報酬率與變異係數，用來比較兩資產的典型表現與波動程度。
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>指標</th>
+                <th>0050</th>
+                <th>臺灣加權指數</th>
+              </tr>
+            </thead>
+            <tbody id="statsTable"></tbody>
+          </table>
+        </div>
+        <div class="summary-grid" style="margin-top: 16px;" id="statsHighlights"></div>
+      </section>
+
+      <section class="panel split" id="section5">
+        <h2>5. 相關係數分析</h2>
+        <p class="section-intro">
+          相關係數反映兩個月報酬率序列是否傾向同向變動，以及同步程度高低；它只能說明共同變動，不能直接推論其中一者造成另一者變動。
+        </p>
+        <div class="summary-grid" id="corrCards"></div>
+        <div class="notes" id="corrNotes"></div>
+      </section>
+
+      <section class="panel" id="section6">
+        <h2>6. 管理或投資意義</h2>
+        <p class="section-intro">
+          以下文字依本期間資料產生，重點在於描述統計與風險特徵的解讀，而不是買賣建議。若要繳交正式作業，可直接依此結構微調為你們組別的口吻與版面。
+        </p>
+        <div class="narrative" id="narrative"></div>
+        <div class="footnote">
+          注意：本頁已明確避開投資推薦語氣；若未來替換為其他資產組合，也應維持同樣的謹慎表述方式，並在資料有缺漏時說明刪除或補值規則。
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const metadata = {
+      source: 'Yahoo Finance 與工作區既有整理檔',
+      downloadDate: '2026/07/15',
+      analysisRange: '2018/01/01 至 2026/06/30',
+      reportDate: '2026/07/15'
+    };
+
+    const priceCsv = `日期,0050收盤價,臺灣加權指數收盤價
+2018/1/31,21.16,11103.79
+2018/2/27,20.59,10815.47
+2018/3/30,20.71,10906.22
+2018/4/30,20.00,10657.88
+2018/5/31,20.19,10874.96
+2018/6/29,20.36,10836.91
+2018/7/31,21.39,11057.51
+2018/8/31,21.74,11063.94
+2018/9/28,21.73,11006.34
+2018/10/31,19.39,9802.13
+2018/11/30,19.19,9888.03
+2018/12/28,18.88,9727.41
+2019/1/30,18.59,9932.26
+2019/2/27,19.41,10389.17
+2019/3/29,19.79,10641.04
+2019/4/30,20.70,10967.73
+2019/5/31,19.61,10498.49
+2019/6/28,20.23,10730.83
+2019/7/31,20.70,10823.81
+2019/8/30,20.46,10618.05
+2019/9/27,21.15,10829.68
+2019/10/31,22.52,11358.71
+2019/11/29,22.88,11489.57
+2019/12/31,24.24,11997.14
+2020/1/31,22.49,11495.10
+2020/2/27,22.16,11292.17
+2020/3/31,19.04,9708.06
+2020/4/30,21.38,10992.14
+2020/5/29,21.11,10942.16
+2020/6/30,22.48,11621.24
+2020/7/31,25.95,12664.80
+2020/8/31,25.45,12591.45
+2020/9/30,25.75,12515.61
+2020/10/30,25.75,12546.34
+2020/11/30,28.33,13722.89
+2020/12/31,30.56,14732.53
+2021/1/29,32.05,15138.31
+2021/2/26,33.35,15953.80
+2021/3/31,33.69,16431.13
+2021/4/29,35.15,17566.66
+2021/5/31,34.28,17068.43
+2021/6/30,34.74,17755.46
+2021/7/30,34.01,17247.41
+2021/8/31,35.09,17490.29
+2021/9/30,34.26,16934.77
+2021/10/29,33.95,16987.41
+2021/11/30,34.50,17427.76
+2021/12/30,36.38,18218.84
+2022/1/26,35.39,17674.40
+2022/2/25,34.62,17652.18
+2022/3/31,34.53,17693.47
+2022/4/29,32.19,16592.18
+2022/5/31,32.45,16807.77
+2022/6/30,28.95,14825.73
+2022/7/29,29.50,15000.07
+2022/8/31,29.40,15095.44
+2022/9/30,25.86,13424.58
+2022/10/31,24.76,12949.75
+2022/11/30,29.09,14879.55
+2022/12/30,27.55,14137.69
+2023/1/31,29.58,15265.20
+2023/2/24,29.70,15503.79
+2023/3/31,30.40,15868.06
+2023/4/28,29.35,15579.18
+2023/5/31,31.54,16578.96
+2023/6/30,32.28,16915.54
+2023/7/31,32.20,17145.43
+2023/8/31,31.42,16634.51
+2023/9/28,30.66,16353.74
+2023/10/31,30.29,16001.27
+2023/11/30,32.84,17433.85
+2023/12/29,33.86,17930.81
+2024/1/31,33.59,17889.56
+2024/2/29,35.83,18966.77
+2024/3/29,39.45,20294.45
+2024/4/30,39.56,20396.60
+2024/5/31,41.50,21174.22
+2024/6/28,46.61,23032.25
+2024/7/31,45.21,22199.35
+2024/8/30,45.34,22268.09
+2024/9/30,45.99,22224.54
+2024/10/30,47.95,22820.43
+2024/11/29,46.81,22262.50
+2024/12/31,48.94,23035.10
+2025/1/22,50.33,23525.41
+2025/2/27,48.12,23053.18
+2025/3/31,43.19,20695.90
+2025/4/30,42.15,20235.03
+2025/5/29,44.94,21347.30
+2025/6/30,48.36,22256.02
+2025/7/31,51.55,23542.52
+2025/8/29,52.50,24233.10
+2025/9/30,57.80,25820.54
+2025/10/31,64.75,28233.35
+2025/11/28,62.35,27626.48
+2025/12/31,65.60,28963.60
+2026/1/30,72.60,32063.75
+2026/2/26,81.15,35414.49
+2026/3/31,72.35,31722.99
+2026/4/30,90.50,38926.63
+2026/5/29,105.40,44732.94
+2026/6/30,107.80,46125.91`;
+
+    const returnCsv = `日期,0050月報酬率,臺灣加權指數月報酬率
+2018/1/31,,
+2018/2/27,-0.026938,-0.025966
+2018/3/30,0.005828,0.008391
+2018/4/30,-0.034283,-0.022770
+2018/5/31,0.009500,0.020368
+2018/6/29,0.008420,-0.003499
+2018/7/31,0.050589,0.020356
+2018/8/31,0.016363,0.000582
+2018/9/28,-0.000460,-0.005206
+2018/10/31,-0.107685,-0.109411
+2018/11/30,-0.010315,0.008763
+2018/12/28,-0.016154,-0.016244
+2019/1/30,-0.015360,0.021059
+2019/2/27,0.044110,0.046003
+2019/3/29,0.019578,0.024244
+2019/4/30,0.045983,0.030701
+2019/5/31,-0.052657,-0.042784
+2019/6/28,0.031617,0.022131
+2019/7/31,0.023233,0.008665
+2019/8/30,-0.011594,-0.019010
+2019/9/27,0.033724,0.019931
+2019/10/31,0.064775,0.048850
+2019/11/29,0.015986,0.011521
+2019/12/31,0.059441,0.044177
+2020/1/31,-0.072195,-0.041847
+2020/2/27,-0.014673,-0.017654
+2020/3/31,-0.140794,-0.140284
+2020/4/30,0.122899,0.132269
+2020/5/29,-0.012629,-0.004547
+2020/6/30,0.064898,0.062061
+2020/7/31,0.154359,0.089798
+2020/8/31,-0.019268,-0.005792
+2020/9/30,0.011788,-0.006023
+2020/10/30,0.000000,0.002455
+2020/11/30,0.100194,0.093776
+2020/12/31,0.078715,0.073573
+2021/1/29,0.048757,0.027543
+2021/2/26,0.040562,0.053869
+2021/3/31,0.010195,0.029920
+2021/4/29,0.043336,0.069108
+2021/5/31,-0.024751,-0.028362
+2021/6/30,0.013419,0.040252
+2021/7/30,-0.021013,-0.028614
+2021/8/31,0.031755,0.014082
+2021/9/30,-0.023653,-0.031762
+2021/10/29,-0.009048,0.003108
+2021/11/30,0.016200,0.025922
+2021/12/30,0.054493,0.045392
+2022/1/26,-0.027213,-0.029883
+2022/2/25,-0.021758,-0.001257
+2022/3/31,-0.002600,0.002339
+2022/4/29,-0.067767,-0.062243
+2022/5/31,0.008077,0.012993
+2022/6/30,-0.107858,-0.117924
+2022/7/29,0.018998,0.011759
+2022/8/31,-0.003390,0.006358
+2022/9/30,-0.120408,-0.110686
+2022/10/31,-0.042537,-0.035370
+2022/11/30,0.174879,0.149022
+2022/12/30,-0.052939,-0.049858
+2023/1/31,0.073684,0.079752
+2023/2/24,0.004057,0.015630
+2023/3/31,0.023569,0.023496
+2023/4/28,-0.034539,-0.018205
+2023/5/31,0.074617,0.064174
+2023/6/30,0.023462,0.020302
+2023/7/31,-0.002478,0.013590
+2023/8/31,-0.024224,-0.029799
+2023/9/28,-0.024188,-0.016879
+2023/10/31,-0.012068,-0.021553
+2023/11/30,0.084186,0.089529
+2023/12/29,0.031060,0.028505
+2024/1/31,-0.007974,-0.002301
+2024/2/29,0.066687,0.060214
+2024/3/29,0.101033,0.070000
+2024/4/30,0.002788,0.005033
+2024/5/31,0.049039,0.038125
+2024/6/28,0.123133,0.087750
+2024/7/31,-0.030036,-0.036162
+2024/8/30,0.002875,0.003096
+2024/9/30,0.014336,-0.001956
+2024/10/30,0.042618,0.026812
+2024/11/29,-0.023775,-0.024449
+2024/12/31,0.045503,0.034704
+2025/1/22,0.028402,0.021285
+2025/2/27,-0.043910,-0.020073
+2025/3/31,-0.102452,-0.102254
+2025/4/30,-0.024080,-0.022269
+2025/5/29,0.066192,0.054968
+2025/6/30,0.076101,0.042568
+2025/7/31,0.065964,0.057805
+2025/8/29,0.018429,0.029333
+2025/9/30,0.100952,0.065507
+2025/10/31,0.120242,0.093445
+2025/11/28,-0.037066,-0.021495
+2025/12/31,0.052125,0.048400
+2026/1/30,0.106707,0.107036
+2026/2/26,0.117769,0.104502
+2026/3/31,-0.108441,-0.104237
+2026/4/30,0.250864,0.227079
+2026/5/29,0.164641,0.149160
+2026/6/30,0.022770,0.031140`;
+
+    const assetConfig = {
+      etf: {
+        name: '元大台灣 50 ETF',
+        ticker: '0050.TW',
+        type: '市值型 ETF',
+        priceKey: 'etfPrice',
+        returnKey: 'etfReturn',
+        color: '#9a3412'
+      },
+      index: {
+        name: '臺灣加權指數',
+        ticker: '^TWII',
+        type: '市場指數',
+        priceKey: 'indexPrice',
+        returnKey: 'indexReturn',
+        color: '#0f766e'
+      }
+    };
+
+    function parsePriceCsv(csv) {
+      return csv.trim().split('\n').slice(1).map((line) => {
+        const [date, etfPrice, indexPrice] = line.split(',');
+        return {
+          date,
+          etfPrice: Number(etfPrice),
+          indexPrice: Number(indexPrice)
+        };
+      });
+    }
+
+    function parseReturnCsv(csv) {
+      return csv.trim().split('\n').slice(1).map((line) => {
+        const [date, etfReturn, indexReturn] = line.split(',');
+        return {
+          date,
+          etfReturn: etfReturn ? Number(etfReturn) : null,
+          indexReturn: indexReturn ? Number(indexReturn) : null
+        };
+      });
+    }
+
+    function mean(values) {
+      return values.reduce((sum, value) => sum + value, 0) / values.length;
+    }
+
+    function quantile(sortedValues, q) {
+      const position = (sortedValues.length - 1) * q;
+      const lower = Math.floor(position);
+      const upper = Math.ceil(position);
+      if (lower === upper) {
+        return sortedValues[lower];
+      }
+      return sortedValues[lower] + (sortedValues[upper] - sortedValues[lower]) * (position - lower);
+    }
+
+    function sampleStdDev(values) {
+      const avg = mean(values);
+      const variance = values.reduce((sum, value) => sum + ((value - avg) ** 2), 0) / (values.length - 1);
+      return Math.sqrt(variance);
+    }
+
+    function geometricMean(values) {
+      return Math.pow(values.reduce((product, value) => product * (1 + value), 1), 1 / values.length) - 1;
+    }
+
+    function correlation(xs, ys) {
+      const xAvg = mean(xs);
+      const yAvg = mean(ys);
+      const numerator = xs.reduce((sum, x, index) => sum + ((x - xAvg) * (ys[index] - yAvg)), 0);
+      const denominator = Math.sqrt(
+        xs.reduce((sum, x) => sum + ((x - xAvg) ** 2), 0) *
+        ys.reduce((sum, y) => sum + ((y - yAvg) ** 2), 0)
+      );
+      return numerator / denominator;
+    }
+
+    function buildStats(values) {
+      const sorted = [...values].sort((a, b) => a - b);
+      const avg = mean(values);
+      const sd = sampleStdDev(values);
+      const q1 = quantile(sorted, 0.25);
+      const median = quantile(sorted, 0.5);
+      const q3 = quantile(sorted, 0.75);
+      const min = sorted[0];
+      const max = sorted[sorted.length - 1];
+      const lowerFence = q1 - 1.5 * (q3 - q1);
+      const upperFence = q3 + 1.5 * (q3 - q1);
+      const outliers = values.filter((value) => value < lowerFence || value > upperFence);
+      return {
+        mean: avg,
+        median,
+        sd,
+        min,
+        max,
+        q1,
+        q3,
+        range: max - min,
+        arithmeticReturn: avg,
+        geometricReturn: geometricMean(values),
+        cv: Math.abs(avg) < 1e-8 ? null : sd / avg,
+        outliers,
+        positiveCount: values.filter((value) => value > 0).length,
+        negativeCount: values.filter((value) => value < 0).length
+      };
+    }
+
+    function correlationLabel(value) {
+      const absValue = Math.abs(value);
+      const direction = value > 0 ? '正向' : value < 0 ? '負向' : '無明顯方向';
+      let strength = '很弱';
+      if (absValue >= 0.8) {
+        strength = '高度';
+      } else if (absValue >= 0.5) {
+        strength = '中高度';
+      } else if (absValue >= 0.3) {
+        strength = '中度';
+      } else if (absValue >= 0.1) {
+        strength = '偏弱';
+      }
+      return `${direction}、${strength}相關`;
+    }
+
+    function formatPct(value, digits = 2) {
+      if (value === null || Number.isNaN(value)) {
+        return '不適用';
+      }
+      return `${(value * 100).toFixed(digits)}%`;
+    }
+
+    function formatNumber(value, digits = 2) {
+      return Number(value).toFixed(digits);
+    }
+
+    function formatCv(value) {
+      return value === null ? '不宜單獨解讀' : value.toFixed(2);
+    }
+
+    function topMoves(rows, key, label) {
+      return rows
+        .map((row) => ({ date: row.date, value: row[key], label }))
+        .sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
+        .slice(0, 3);
+    }
+
+    function buildFrequency(values, bins) {
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const width = (max - min) / bins;
+      const rows = [];
+      let cumulative = 0;
+
+      for (let index = 0; index < bins; index += 1) {
+        const start = min + (width * index);
+        const end = index === bins - 1 ? max : min + (width * (index + 1));
+        const count = values.filter((value) => {
+          if (index === bins - 1) {
+            return value >= start && value <= end;
+          }
+          return value >= start && value < end;
+        }).length;
+        const relative = count / values.length;
+        cumulative += relative;
+        rows.push({ start, end, count, relative, cumulative });
+      }
+
+      return {
+        min,
+        max,
+        width,
+        rows
+      };
+    }
+
+    const priceRows = parsePriceCsv(priceCsv);
+    const returnRows = parseReturnCsv(returnCsv);
+    const returnMap = new Map(returnRows.map((row) => [row.date, row]));
+
+    const mergedRows = priceRows.map((priceRow) => ({
+      ...priceRow,
+      ...(returnMap.get(priceRow.date) || { etfReturn: null, indexReturn: null })
+    }));
+
+    const validRows = mergedRows.filter((row) => row.etfReturn !== null && row.indexReturn !== null);
+    const dates = validRows.map((row) => row.date);
+    const etfReturns = validRows.map((row) => row.etfReturn);
+    const indexReturns = validRows.map((row) => row.indexReturn);
+    const etfStats = buildStats(etfReturns);
+    const indexStats = buildStats(indexReturns);
+    const corr = correlation(etfReturns, indexReturns);
+    const topEtfMoves = topMoves(validRows, 'etfReturn', '0050');
+    const topIndexMoves = topMoves(validRows, 'indexReturn', '臺灣加權指數');
+    const freqBins = Math.ceil(Math.log2(etfReturns.length) + 1);
+    const freq = buildFrequency(etfReturns, freqBins);
+    const commonOutlierMonths = validRows.filter((row) =>
+      etfStats.outliers.includes(row.etfReturn) || indexStats.outliers.includes(row.indexReturn)
+    );
+
+    document.getElementById('heroMeta').innerHTML = [
+      { label: '資料來源', value: metadata.source },
+      { label: '下載日期', value: metadata.downloadDate },
+      { label: '資料期間', value: metadata.analysisRange },
+      { label: '報告建立日', value: metadata.reportDate }
+    ].map((item) => `
+      <div class="meta-item">
+        <div class="label">${item.label}</div>
+        <div class="value">${item.value}</div>
+      </div>
+    `).join('');
+
+    document.getElementById('kpis').innerHTML = [
+      { label: '有效樣本數', value: `${validRows.length} 個月` },
+      { label: '0050 平均月報酬', value: formatPct(etfStats.mean) },
+      { label: '加權指數平均月報酬', value: formatPct(indexStats.mean) },
+      { label: '0050 標準差', value: formatPct(etfStats.sd) },
+      { label: '加權指數標準差', value: formatPct(indexStats.sd) },
+      { label: '相關係數', value: corr.toFixed(3) }
+    ].map((item) => `
+      <div class="kpi">
+        <div class="label">${item.label}</div>
+        <div class="value">${item.value}</div>
+      </div>
+    `).join('');
+
+    document.getElementById('sourceCards').innerHTML = [
+      {
+        title: `${assetConfig.etf.name} (${assetConfig.etf.ticker})`,
+        text: `資產類型為${assetConfig.etf.type}，本報告以每月最後一個交易日價格計算月報酬率，並用於描述統計與圖表分析。`
+      },
+      {
+        title: `${assetConfig.index.name} (${assetConfig.index.ticker})`,
+        text: `資產類型為${assetConfig.index.type}，作為臺灣整體股票市場走勢的代表變數，用來比較 ETF 與市場大盤的波動同步性。`
+      },
+      {
+        title: '樣本與使用方式',
+        text: `月價格資料共有 ${mergedRows.length} 筆；因首月缺少前一期價格，月報酬率有效樣本為 ${validRows.length} 筆。後續統計皆以有效月份進行。`
+      },
+      {
+        title: '缺漏資料處理',
+        text: '2018/1/31 沒有前一個月底價格，因此月報酬率留白並排除於統計之外；若未來新增資料出現缺漏，建議使用相同月份成對刪除方式。'
+      }
+    ].map((item) => `
+      <article class="highlight">
+        <strong>${item.title}</strong>
+        <p>${item.text}</p>
+      </article>
+    `).join('');
+
+    document.getElementById('definitionTable').innerHTML = [
+      ['月底價格', '每月最後一個交易日的收盤價。若月底為週末或休市日，則改用該月最後交易日。', '作為月報酬率計算的基礎價格。'],
+      ['月報酬率', '（本月月底價格 − 上月月底價格）／上月月底價格。', '用來比較兩資產的平均表現、波動與相關性。'],
+      ['資產類型', '0050 為市值型 ETF；臺灣加權指數為市場指數。', '協助解讀兩資產在市場代表性與風險來源上的差異。']
+    ].map((row) => `
+      <tr>
+        <td>${row[0]}</td>
+        <td>${row[1]}</td>
+        <td>${row[2]}</td>
+      </tr>
+    `).join('');
+
+    document.getElementById('sourceCaption').textContent = '本頁參考工作區中的整理檔製作。若你們組別另有原始下載日期紀錄，繳交前可將頁面上方的下載日期改成實際日期。';
+
+    document.getElementById('processingCards').innerHTML = [
+      {
+        title: '步驟 1：彙整月價格',
+        text: '由整理好的月底價格比較表讀入 0050 與臺灣加權指數的月資料，日期欄位對齊後保留相同月份。'
+      },
+      {
+        title: '步驟 2：計算月報酬率',
+        text: '以相鄰兩個月底價格計算月報酬率，因此首月只保留價格、不進入月報酬率統計。'
+      },
+      {
+        title: '步驟 3：缺漏值處理',
+        text: '若該月任一資產缺少月報酬率，則不納入相關係數與雙變量圖表，以維持比較口徑一致。'
+      },
+      {
+        title: '步驟 4：產出報告',
+        text: '使用同一份月報酬率資料生成次數分配表、描述統計量與管理意義段落，避免各段落數字不一致。'
+      }
+    ].map((item) => `
+      <article class="mini-card">
+        <div class="label">${item.title}</div>
+        <p>${item.text}</p>
+      </article>
+    `).join('');
+
+    document.getElementById('previewTable').innerHTML = mergedRows.slice(0, 5).map((row) => `
+      <tr>
+        <td>${row.date}</td>
+        <td>${formatNumber(row.etfPrice)}</td>
+        <td>${formatNumber(row.indexPrice)}</td>
+        <td>${row.etfReturn === null ? '—' : formatPct(row.etfReturn, 3)}</td>
+        <td>${row.indexReturn === null ? '—' : formatPct(row.indexReturn, 3)}</td>
+      </tr>
+    `).join('');
+
+    document.getElementById('freqTable').innerHTML = freq.rows.map((row) => `
+      <tr>
+        <td>${formatPct(row.start, 2)} 至 ${formatPct(row.end, 2)}</td>
+        <td>${row.count}</td>
+        <td>${formatPct(row.relative, 2)}</td>
+        <td>${formatPct(row.cumulative, 2)}</td>
+      </tr>
+    `).join('');
+
+    document.getElementById('statsTable').innerHTML = [
+      ['Mean', formatPct(etfStats.mean), formatPct(indexStats.mean)],
+      ['Median', formatPct(etfStats.median), formatPct(indexStats.median)],
+      ['Standard Deviation', formatPct(etfStats.sd), formatPct(indexStats.sd)],
+      ['Min', formatPct(etfStats.min), formatPct(indexStats.min)],
+      ['Max', formatPct(etfStats.max), formatPct(indexStats.max)],
+      ['Q1', formatPct(etfStats.q1), formatPct(indexStats.q1)],
+      ['Q3', formatPct(etfStats.q3), formatPct(indexStats.q3)],
+      ['Range', formatPct(etfStats.range), formatPct(indexStats.range)],
+      ['Arithmetic Mean Return', formatPct(etfStats.arithmeticReturn), formatPct(indexStats.arithmeticReturn)],
+      ['Geometric Mean Return', formatPct(etfStats.geometricReturn), formatPct(indexStats.geometricReturn)],
+      ['Coefficient of Variation', formatCv(etfStats.cv), formatCv(indexStats.cv)]
+    ].map((row) => `
+      <tr>
+        <td>${row[0]}</td>
+        <td>${row[1]}</td>
+        <td>${row[2]}</td>
+      </tr>
+    `).join('');
+
+    const typicalWinner = etfStats.median > indexStats.median ? '0050' : '臺灣加權指數';
+    const volatilityWinner = etfStats.sd > indexStats.sd ? '0050' : '臺灣加權指數';
+    const meanGapWinner = Math.abs(etfStats.arithmeticReturn - etfStats.geometricReturn) > Math.abs(indexStats.arithmeticReturn - indexStats.geometricReturn)
+      ? '0050'
+      : '臺灣加權指數';
+
+    document.getElementById('statsHighlights').innerHTML = [
+      {
+        label: '典型月報酬較高',
+        value: typicalWinner,
+        text: `以中位數觀察，${typicalWinner}在本期間呈現較高的典型月報酬。`
+      },
+      {
+        label: '波動較大',
+        value: volatilityWinner,
+        text: `以標準差比較，${volatilityWinner}的月報酬率波動較明顯。`
+      },
+      {
+        label: '算術與幾何平均差距較大',
+        value: meanGapWinner,
+        text: '兩種平均數的差距越大，通常代表波動對長期複利的拖累效果越明顯。'
+      }
+    ].map((item) => `
+      <article class="stat-callout">
+        <div class="label">${item.label}</div>
+        <div class="value">${item.value}</div>
+        <p>${item.text}</p>
+      </article>
+    `).join('');
+
+    document.getElementById('corrCards').innerHTML = [
+      {
+        label: '相關係數',
+        value: corr.toFixed(3),
+        text: '數值越接近 1，表示兩者越常同向變動；越接近 -1 則表示反向變動。'
+      },
+      {
+        label: '方向與強弱',
+        value: correlationLabel(corr),
+        text: '本頁將相關程度分為很弱、偏弱、中度、中高度與高度，以協助口頭報告解讀。'
+      },
+      {
+        label: '分散效果判讀',
+        value: corr > 0.8 ? '有限' : corr > 0.5 ? '可能有限' : '相對較高',
+        text: '若相關係數很高，表示兩者大多一起上漲或下跌，分散風險效果通常不會太強。'
+      }
+    ].map((item) => `
+      <article class="stat-callout">
+        <div class="label">${item.label}</div>
+        <div class="value">${item.value}</div>
+        <p>${item.text}</p>
+      </article>
+    `).join('');
+
+    document.getElementById('corrNotes').innerHTML = [
+      `根據本期間資料，0050 與臺灣加權指數的月報酬率相關係數為 ${corr.toFixed(3)}，屬於 ${correlationLabel(corr)}。`,
+      '這表示兩者多數月份有明顯同步漲跌現象，因此若把 0050 與加權指數視為兩個配置對象，分散效果通常有限。',
+      '需注意的是，相關係數只能說明共同變動，不代表 0050 會造成加權指數變動，或加權指數會造成 0050 變動。'
+    ].map((text) => `
+      <article class="note">
+        <strong>解讀重點</strong>
+        <p>${text}</p>
+      </article>
+    `).join('');
+
+    const lineTheme = {
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: '#fffdfa',
+      font: { family: 'IBM Plex Sans TC, sans-serif', color: '#1e293b' },
+      margin: { l: 60, r: 20, t: 24, b: 64 },
+      xaxis: { gridcolor: '#e8ded1', zerolinecolor: '#d8c9b3' },
+      yaxis: { gridcolor: '#e8ded1', zerolinecolor: '#d8c9b3', tickformat: '.0%' }
+    };
+
+    Plotly.newPlot('lineChart', [
+      {
+        x: dates,
+        y: etfReturns,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: '0050 月報酬率',
+        line: { color: assetConfig.etf.color, width: 3 },
+        marker: { size: 6 },
+        hovertemplate: '日期: %{x}<br>0050: %{y:.2%}<extra></extra>'
+      },
+      {
+        x: dates,
+        y: indexReturns,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: '臺灣加權指數月報酬率',
+        line: { color: assetConfig.index.color, width: 3 },
+        marker: { size: 6 },
+        hovertemplate: '日期: %{x}<br>加權指數: %{y:.2%}<extra></extra>'
+      }
+    ], {
+      ...lineTheme,
+      legend: { orientation: 'h', y: 1.1 },
+      xaxis: { ...lineTheme.xaxis, title: '月份', tickangle: -35 },
+      yaxis: { ...lineTheme.yaxis, title: '月報酬率' }
+    }, { responsive: true });
+
+    Plotly.newPlot('histChart', [
+      {
+        x: etfReturns,
+        type: 'histogram',
+        name: '0050',
+        opacity: 0.72,
+        marker: { color: assetConfig.etf.color, line: { color: '#fffdfa', width: 1 } },
+        xbins: { start: freq.min, end: freq.max, size: freq.width },
+        hovertemplate: '0050 區間: %{x:.2%}<br>次數: %{y}<extra></extra>'
+      },
+      {
+        x: indexReturns,
+        type: 'histogram',
+        name: '臺灣加權指數',
+        opacity: 0.58,
+        marker: { color: assetConfig.index.color, line: { color: '#fffdfa', width: 1 } },
+        xbins: { start: freq.min, end: freq.max, size: freq.width },
+        hovertemplate: '加權指數區間: %{x:.2%}<br>次數: %{y}<extra></extra>'
+      }
+    ], {
+      ...lineTheme,
+      barmode: 'overlay',
+      xaxis: { ...lineTheme.xaxis, title: '月報酬率', tickformat: '.0%' },
+      yaxis: { ...lineTheme.yaxis, title: '月份數', tickformat: undefined }
+    }, { responsive: true });
+
+    Plotly.newPlot('boxChart', [
+      {
+        y: etfReturns,
+        type: 'box',
+        name: '0050',
+        boxpoints: 'outliers',
+        marker: { color: assetConfig.etf.color },
+        line: { color: assetConfig.etf.color },
+        hovertemplate: '0050: %{y:.2%}<extra></extra>'
+      },
+      {
+        y: indexReturns,
+        type: 'box',
+        name: '臺灣加權指數',
+        boxpoints: 'outliers',
+        marker: { color: assetConfig.index.color },
+        line: { color: assetConfig.index.color },
+        hovertemplate: '加權指數: %{y:.2%}<extra></extra>'
+      }
+    ], {
+      ...lineTheme,
+      xaxis: { ...lineTheme.xaxis, title: '資產' },
+      yaxis: { ...lineTheme.yaxis, title: '月報酬率' }
+    }, { responsive: true });
+
+    Plotly.newPlot('scatterChart', [{
+      x: etfReturns,
+      y: indexReturns,
+      type: 'scatter',
+      mode: 'markers',
+      text: dates,
+      marker: {
+        size: 9,
+        color: dates.map((_, index) => index),
+        colorscale: [[0, '#9a3412'], [1, '#0f766e']],
+        opacity: 0.74,
+        line: { width: 0.6, color: '#fffdfa' }
+      },
+      hovertemplate: '日期: %{text}<br>0050: %{x:.2%}<br>加權指數: %{y:.2%}<extra></extra>'
+    }], {
+      ...lineTheme,
+      xaxis: { ...lineTheme.xaxis, title: '0050 月報酬率', tickformat: '.0%' },
+      yaxis: { ...lineTheme.yaxis, title: '臺灣加權指數月報酬率' },
+      annotations: [{
+        xref: 'paper',
+        yref: 'paper',
+        x: 0.02,
+        y: 0.98,
+        text: `相關係數 ${corr.toFixed(3)}`,
+        showarrow: false,
+        bgcolor: 'rgba(255, 252, 247, 0.96)',
+        bordercolor: '#d8c9b3',
+        borderwidth: 1,
+        font: { size: 14 }
+      }],
+      shapes: [
+        {
+          type: 'line',
+          x0: Math.min(...etfReturns),
+          x1: Math.max(...etfReturns),
+          y0: 0,
+          y1: 0,
+          line: { color: '#cbd5e1', dash: 'dot' }
+        },
+        {
+          type: 'line',
+          x0: 0,
+          x1: 0,
+          y0: Math.min(...indexReturns),
+          y1: Math.max(...indexReturns),
+          line: { color: '#cbd5e1', dash: 'dot' }
+        }
+      ]
+    }, { responsive: true });
+
+    document.getElementById('chartNotes').innerHTML = [
+      {
+        title: '極端月份',
+        text: `依絕對報酬率觀察，0050 最明顯的月份包含 ${topEtfMoves.map((item) => `${item.date}（${formatPct(item.value)}）`).join('、')}。`
+      },
+      {
+        title: '大盤波動月份',
+        text: `臺灣加權指數的主要波動月份包含 ${topIndexMoves.map((item) => `${item.date}（${formatPct(item.value)}）`).join('、')}。`
+      },
+      {
+        title: '箱型圖判讀',
+        text: `${volatilityWinner}的四分位區間與整體分散程度較大，表示在本期間內月報酬率波動相對更明顯。`
+      },
+      {
+        title: '缺漏值說明',
+        text: `本資料只有 ${mergedRows[0].date} 因缺少前一期價格而沒有月報酬率；其餘有效月份已納入圖表與統計。`
+      }
+    ].map((item) => `
+      <article class="note">
+        <strong>${item.title}</strong>
+        <p>${item.text}</p>
+      </article>
+    `).join('');
+
+    const diversificationText = corr > 0.8
+      ? '兩者共同變動相當明顯，若只在這兩者之間配置，分散效果通常有限。'
+      : '兩者仍有共同變動，但同步程度未達完全一致，因此理論上仍可能保留部分分散效果。';
+
+    const extremeMonthText = commonOutlierMonths.length > 0
+      ? `依箱型圖離群值與絕對報酬率觀察，較值得注意的極端月份包括 ${commonOutlierMonths.slice(0, 4).map((row) => row.date).join('、')}。`
+      : '本資料未出現明顯離群值月份，但仍可從最大與最小報酬率判斷高波動時段。';
+
+    document.getElementById('narrative').innerHTML = `
+      <p>根據本期間資料，若以中位數與算術平均月報酬率觀察，${typicalWinner === '0050' ? '<span class="accent">0050</span>' : '<span class="accent-2">臺灣加權指數</span>'}的典型月報酬略高；若以標準差衡量波動，${volatilityWinner === '0050' ? '<span class="accent">0050</span>' : '<span class="accent-2">臺灣加權指數</span>'}的波動較大，表示其單月漲跌幅度相對更明顯。再比較算術平均報酬率與幾何平均報酬率，兩者都存在差距，顯示月報酬率波動會對長期複利結果造成拖累，而${meanGapWinner}的差距較大，也代表其波動對長期平均成長率的影響更值得注意。</p>
+      <p>${extremeMonthText} 這些月份通常伴隨市場急跌急彈，因此在報告中可視為風險說明的重點。另一方面，兩資產月報酬率的相關係數為 <span class="accent-2">${corr.toFixed(3)}</span>，屬於${correlationLabel(corr)}，表示它們在多數月份傾向同向變動。${diversificationText} 如果以理財專員、基金經理人或企業退休基金管理者的角度說明，較適合向客戶或主管表示：根據本期間資料，0050 與大盤整體走勢高度連動，0050 可作為市場代表性資產的近似觀察工具，但在風險管理上仍需留意極端月份與波動擴大的期間，而不應把這些統計結果直接解讀為未來績效保證或買賣建議。</p>
+    `;
+  </script>
+</body>
+</html>
