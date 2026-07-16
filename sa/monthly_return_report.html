@@ -257,6 +257,31 @@
       grid-template-columns: repeat(12, minmax(0, 1fr));
     }
 
+    .table-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .table-grid .table-wrap {
+      grid-column: span 12;
+    }
+
+    .formula-box {
+      margin-top: 14px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid var(--line);
+      line-height: 1.8;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .formula-box strong {
+      color: var(--ink);
+    }
+
     .chart-card {
       grid-column: span 12;
       background: rgba(255, 255, 255, 0.76);
@@ -297,31 +322,6 @@
 
     .note {
       background: linear-gradient(180deg, rgba(15, 118, 110, 0.08), rgba(15, 118, 110, 0.03));
-    }
-
-    .narrative {
-      line-height: 1.95;
-      font-size: 15px;
-      color: var(--ink);
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(246, 241, 232, 0.9));
-      border-radius: 24px;
-      border: 1px solid rgba(154, 52, 18, 0.14);
-      padding: 20px 22px;
-    }
-
-    .narrative p {
-      margin: 0 0 12px;
-    }
-
-    .narrative p:last-child {
-      margin-bottom: 0;
-    }
-
-    .footnote {
-      margin-top: 16px;
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.7;
     }
 
     .accent {
@@ -394,7 +394,6 @@
             <tbody id="definitionTable"></tbody>
           </table>
         </div>
-        <p class="table-caption" id="sourceCaption"></p>
       </section>
 
       <section class="panel" id="section2">
@@ -430,29 +429,50 @@
             <h3>月報酬率折線圖</h3>
             <p>折線圖用來觀察各月份漲跌循環、同步性與市場劇烈波動區段。</p>
             <div id="lineChart" class="chart tall"></div>
-          </article>
-
-          <article class="chart-card half">
-            <h3>0050 月報酬率次數分配表</h3>
-            <p>以 Sturges 法則決定組數，整理 0050 月報酬率的組距、次數、相對次數與累積百分比。</p>
-            <div class="table-wrap">
+            <div class="table-wrap" style="margin-top: 16px;">
               <table>
                 <thead>
                   <tr>
-                    <th>組距</th>
-                    <th>次數</th>
-                    <th>相對次數</th>
-                    <th>累積百分比</th>
+                    <th>日期</th>
+                    <th>比較重點</th>
+                    <th>月報酬加減%</th>
+                    <th>可能造成原因的事件新聞</th>
                   </tr>
                 </thead>
-                <tbody id="freqTable"></tbody>
+                <tbody id="eventTable"></tbody>
               </table>
             </div>
+            <p class="table-caption">事件欄位是依當月或鄰近期間的台灣重大事件與市場主題整理，僅用於對照可能的市場情緒背景，不表示事件與報酬率之間存在因果關係。</p>
+          </article>
+
+          <article class="chart-card">
+            <h3>0050 與臺灣加權指數月報酬率次數分配比較</h3>
+            <p>兩個資產都使用固定 5% 組距，讓同一個區間可直接並列比較。這樣比只做單一資產表更容易看出哪個資產在正負報酬區間的集中程度不同。</p>
+            <div class="table-grid">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>組距</th>
+                      <th>0050 次數</th>
+                      <th>0050 相對次數</th>
+                      <th>0050 累積百分比</th>
+                      <th>加權指數次數</th>
+                      <th>加權指數相對次數</th>
+                      <th>加權指數累積百分比</th>
+                    </tr>
+                  </thead>
+                  <tbody id="freqTable"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="notes" id="freqNotes"></div>
+            <div class="formula-box" id="sturgesExplanation"></div>
           </article>
 
           <article class="chart-card half">
             <h3>月報酬率直方圖</h3>
-            <p>直方圖呈現兩個資產的月報酬率分布，方便比較集中區間與尾端風險。</p>
+            <p>直方圖同樣採 5% 組距，能和上方次數分配表維持一致，方便直接對照表格與圖形。</p>
             <div id="histChart" class="chart"></div>
           </article>
 
@@ -471,7 +491,7 @@
         <div class="notes" id="chartNotes"></div>
       </section>
 
-      <section class="panel split" id="section4">
+      <section class="panel" id="section4">
         <h2>4. 第三章：描述統計量</h2>
         <p class="section-intro">
           下表依月報酬率分別計算算術平均數、中位數、標準差、四分位數、全距、幾何平均報酬率與變異係數，用來比較兩資產的典型表現與波動程度。
@@ -481,6 +501,7 @@
             <thead>
               <tr>
                 <th>指標</th>
+                <th>涵義與計算方式</th>
                 <th>0050</th>
                 <th>臺灣加權指數</th>
               </tr>
@@ -500,16 +521,6 @@
         <div class="notes" id="corrNotes"></div>
       </section>
 
-      <section class="panel" id="section6">
-        <h2>6. 管理或投資意義</h2>
-        <p class="section-intro">
-          以下文字依本期間資料產生，重點在於描述統計與風險特徵的解讀，而不是買賣建議。若要繳交正式作業，可直接依此結構微調為你們組別的口吻與版面。
-        </p>
-        <div class="narrative" id="narrative"></div>
-        <div class="footnote">
-          注意：本頁已明確避開投資推薦語氣；若未來替換為其他資產組合，也應維持同樣的謹慎表述方式，並在資料有缺漏時說明刪除或補值規則。
-        </div>
-      </section>
     </main>
   </div>
 
@@ -873,18 +884,18 @@
         .slice(0, 3);
     }
 
-    function buildFrequency(values, bins) {
-      const min = Math.min(...values);
-      const max = Math.max(...values);
-      const width = (max - min) / bins;
+    function buildFrequency(values, width, globalStart = null, globalEnd = null) {
+      const min = globalStart ?? Math.floor(Math.min(...values) / width) * width;
+      const max = globalEnd ?? Math.ceil(Math.max(...values) / width) * width;
       const rows = [];
       let cumulative = 0;
+      const binCount = Math.round((max - min) / width);
 
-      for (let index = 0; index < bins; index += 1) {
+      for (let index = 0; index < binCount; index += 1) {
         const start = min + (width * index);
-        const end = index === bins - 1 ? max : min + (width * (index + 1));
+        const end = min + (width * (index + 1));
         const count = values.filter((value) => {
-          if (index === bins - 1) {
+          if (index === binCount - 1) {
             return value >= start && value <= end;
           }
           return value >= start && value < end;
@@ -920,11 +931,75 @@
     const corr = correlation(etfReturns, indexReturns);
     const topEtfMoves = topMoves(validRows, 'etfReturn', '0050');
     const topIndexMoves = topMoves(validRows, 'indexReturn', '臺灣加權指數');
-    const freqBins = Math.ceil(Math.log2(etfReturns.length) + 1);
-    const freq = buildFrequency(etfReturns, freqBins);
+    const frequencyWidth = 0.05;
+    const globalFrequencyStart = Math.floor(Math.min(...etfReturns, ...indexReturns) / frequencyWidth) * frequencyWidth;
+    const globalFrequencyEnd = Math.ceil(Math.max(...etfReturns, ...indexReturns) / frequencyWidth) * frequencyWidth;
+    const sturgesBins = Math.ceil(Math.log2(etfReturns.length) + 1);
+    const freq = buildFrequency(etfReturns, frequencyWidth, globalFrequencyStart, globalFrequencyEnd);
+    const indexFreq = buildFrequency(indexReturns, frequencyWidth, globalFrequencyStart, globalFrequencyEnd);
     const commonOutlierMonths = validRows.filter((row) =>
       etfStats.outliers.includes(row.etfReturn) || indexStats.outliers.includes(row.indexReturn)
     );
+    const eventLookup = {
+      '2020/3/31': {
+        focus: '雙資產同步重挫',
+        label: '0050 -14.08% / 加權 -14.03%',
+        event: '台灣 3 月進入新冠疫情高度警戒期，中央流行疫情指揮中心陸續宣布旅遊警示升級、入境檢疫與大型活動限制，市場明顯反映疫情衝擊與全球恐慌。'
+      },
+      '2020/4/30': {
+        focus: '雙資產急跌後反彈',
+        label: '0050 +12.29% / 加權 +13.23%',
+        event: '4 月口罩實名制與防疫管制逐步穩定，市場對防疫措施與全球政策救市反應轉為正向，台股出現明顯技術性反彈。'
+      },
+      '2020/7/31': {
+        focus: '0050 大幅上漲',
+        label: '0050 +15.44% / 加權 +8.98%',
+        event: '7 月振興三倍券上路、內需信心改善，加上疫情後科技與電子權值股走強，台股延續反彈並由大型權值股帶動。'
+      },
+      '2022/6/30': {
+        focus: '雙資產明顯下跌',
+        label: '0050 -10.79% / 加權 -11.79%',
+        event: '6 月經濟部電價費率審議會決議調升部分產業電價 15%，疊加升息與通膨壓力，市場對企業成本與景氣前景較為保守。'
+      },
+      '2022/9/30': {
+        focus: '雙資產再度下跌',
+        label: '0050 -12.04% / 加權 -11.07%',
+        event: '9 月台東 6.8 強震造成社會關注，同期市場仍受全球升息與風險趨避情緒影響，台股波動擴大。'
+      },
+      '2022/11/30': {
+        focus: '雙資產強勁反彈',
+        label: '0050 +17.49% / 加權 +14.90%',
+        event: '11 月台美 21 世紀貿易倡議首次談判，加上地方選舉結果落底後不確定性下降，市場情緒較前期改善。'
+      },
+      '2024/3/29': {
+        focus: '電子權值題材帶動上漲',
+        label: '0050 +10.10% / 加權 +7.00%',
+        event: '3 月市場持續聚焦台灣半導體與 AI 伺服器供應鏈題材，權值股帶動指數創高，0050 漲幅相對更突出。'
+      },
+      '2024/6/28': {
+        focus: '大型股延續強勢',
+        label: '0050 +12.31% / 加權 +8.78%',
+        event: '6 月市場仍以 AI 與高階半導體供應鏈為主軸，電子權值股強勢推升 ETF 與大盤同步上行。'
+      },
+      '2025/3/31': {
+        focus: '雙資產同步重挫',
+        label: '0050 -10.25% / 加權 -10.23%',
+        event: '3 月台灣社會面上有美國與台積電投資議題升溫，市場同時面對國際科技產業評價修正，月報酬率轉為明顯負向。'
+      },
+      '2026/3/31': {
+        focus: '戰爭衝擊下的雙資產下跌',
+        label: '0050 -10.84% / 加權 -10.42%',
+        event: '2 月 28 日美以聯軍對伊朗展開大規模空襲後，3 月市場持續消化中東戰事全面爆發的衝擊，油價、地緣政治與全球風險趨避情緒同步升高；烏俄戰事也仍提供外部不確定性背景，使 0050 與加權指數在 3 月都呈現明顯回落。'
+      },
+      '2026/4/30': {
+        focus: '雙資產異常強彈',
+        label: '0050 +25.09% / 加權 +22.71%',
+        event: '4 月 7 日至 8 日的短暫停火，讓市場對中東衝突升級的擔憂一度降溫，資金風險偏好回升；同月漲幅也可能與台積電法說上修全年展望、AI 晶片與先進封裝需求強勁、台灣出口與外銷訂單偏強有關。換言之，4 月表現較像戰爭壓力短暫緩解後，疊加基本面利多的同步修復；烏俄戰事則仍是全球市場的持續背景風險。'
+      }
+    };
+    const eventRows = Object.entries(eventLookup)
+      .map(([date, detail]) => ({ date, ...detail }))
+      .filter((item) => validRows.some((row) => row.date === item.date));
 
     document.getElementById('heroMeta').innerHTML = [
       { label: '資料來源', value: metadata.source },
@@ -988,8 +1063,6 @@
       </tr>
     `).join('');
 
-    document.getElementById('sourceCaption').textContent = '本頁參考工作區中的整理檔製作。若你們組別另有原始下載日期紀錄，繳交前可將頁面上方的下載日期改成實際日期。';
-
     document.getElementById('processingCards').innerHTML = [
       {
         title: '步驟 1：彙整月價格',
@@ -1024,32 +1097,70 @@
       </tr>
     `).join('');
 
-    document.getElementById('freqTable').innerHTML = freq.rows.map((row) => `
+    document.getElementById('freqTable').innerHTML = freq.rows.map((row, index) => {
+      const twin = indexFreq.rows[index];
+      return `
       <tr>
         <td>${formatPct(row.start, 2)} 至 ${formatPct(row.end, 2)}</td>
         <td>${row.count}</td>
         <td>${formatPct(row.relative, 2)}</td>
         <td>${formatPct(row.cumulative, 2)}</td>
+        <td>${twin.count}</td>
+        <td>${formatPct(twin.relative, 2)}</td>
+        <td>${formatPct(twin.cumulative, 2)}</td>
       </tr>
+    `;
+    }).join('');
+
+    document.getElementById('freqNotes').innerHTML = [
+      {
+        title: '組距',
+        text: '組距是把月報酬率切成一段一段的區間。本頁固定每一組寬度為 5%，例如 -5% 至 0%、0% 至 5%，方便直接比較兩個資產在相同波動區間的分布。'
+      },
+      {
+        title: '次數',
+        text: '次數代表有多少個月份的月報酬率落在該組距內。若某區間次數高，表示該報酬區間在樣本期間較常出現。'
+      },
+      {
+        title: '相對次數',
+        text: '相對次數等於次數除以總樣本數，表示某個報酬區間所占比例。它比單看次數更適合拿來比較不同資產的分布集中程度。'
+      },
+      {
+        title: '累積百分比',
+        text: '累積百分比是把各組的相對次數從最小組距一路加總到目前組距，用來觀察某一報酬門檻以下已累積多少月份。'
+      }
+    ].map((item) => `
+      <article class="note">
+        <strong>${item.title}</strong>
+        <p>${item.text}</p>
+      </article>
     `).join('');
 
+    document.getElementById('sturgesExplanation').innerHTML = `
+      <strong>為什麼使用 5% 組距？</strong><br>
+      在金融月報酬率分析中，5% 是常見且容易解讀的寬度，因為它足以區分「明顯下跌、近乎持平、溫和上漲、強勁上漲」等波動層級，同時不會把區間切得過細，造成每組次數太零碎。<br><br>
+      <strong>Sturges 法則是什麼？</strong><br>
+      Sturges 法則建議組數約為 1 + log2(n)。本資料有效樣本數為 ${validRows.length}，估計組數約為 ${sturgesBins} 組。若以兩資產共同全距 ${formatPct(globalFrequencyEnd - globalFrequencyStart, 2)} 來看，平均每組寬度大約是 ${formatPct((globalFrequencyEnd - globalFrequencyStart) / sturgesBins, 2)}，與 5% 非常接近，所以本頁改用固定 5% 組距，兼顧理論參考與實務解讀便利性。`
+      ;
+
     document.getElementById('statsTable').innerHTML = [
-      ['Mean', formatPct(etfStats.mean), formatPct(indexStats.mean)],
-      ['Median', formatPct(etfStats.median), formatPct(indexStats.median)],
-      ['Standard Deviation', formatPct(etfStats.sd), formatPct(indexStats.sd)],
-      ['Min', formatPct(etfStats.min), formatPct(indexStats.min)],
-      ['Max', formatPct(etfStats.max), formatPct(indexStats.max)],
-      ['Q1', formatPct(etfStats.q1), formatPct(indexStats.q1)],
-      ['Q3', formatPct(etfStats.q3), formatPct(indexStats.q3)],
-      ['Range', formatPct(etfStats.range), formatPct(indexStats.range)],
-      ['Arithmetic Mean Return', formatPct(etfStats.arithmeticReturn), formatPct(indexStats.arithmeticReturn)],
-      ['Geometric Mean Return', formatPct(etfStats.geometricReturn), formatPct(indexStats.geometricReturn)],
-      ['Coefficient of Variation', formatCv(etfStats.cv), formatCv(indexStats.cv)]
+      ['Mean', '月報酬率的算術平均數，計算方式為所有月報酬率加總後除以月份數。', formatPct(etfStats.mean), formatPct(indexStats.mean)],
+      ['Median', '將月報酬率由小到大排序後的中間值，可減少極端值對典型報酬判讀的影響。', formatPct(etfStats.median), formatPct(indexStats.median)],
+      ['Standard Deviation', '衡量月報酬率波動程度，依樣本標準差公式計算。數值越大代表波動越明顯。', formatPct(etfStats.sd), formatPct(indexStats.sd)],
+      ['Min', '樣本期間內最低的單月報酬率，用來觀察最差月份。', formatPct(etfStats.min), formatPct(indexStats.min)],
+      ['Max', '樣本期間內最高的單月報酬率，用來觀察最佳月份。', formatPct(etfStats.max), formatPct(indexStats.max)],
+      ['Q1', '第一四分位數，表示有 25% 的月份報酬率低於此值。', formatPct(etfStats.q1), formatPct(indexStats.q1)],
+      ['Q3', '第三四分位數，表示有 75% 的月份報酬率低於此值。', formatPct(etfStats.q3), formatPct(indexStats.q3)],
+      ['Range', '全距，計算方式為最大值減最小值，用來表示整體波動跨度。', formatPct(etfStats.range), formatPct(indexStats.range)],
+      ['Arithmetic Mean Return', '算術平均報酬率，與 Mean 概念相同，強調每月平均報酬。', formatPct(etfStats.arithmeticReturn), formatPct(indexStats.arithmeticReturn)],
+      ['Geometric Mean Return', '幾何平均報酬率，計算方式為 [(1+R1)(1+R2)...(1+Rn)]^(1/n) - 1，可反映複利效果。', formatPct(etfStats.geometricReturn), formatPct(indexStats.geometricReturn)],
+      ['Coefficient of Variation', '變異係數，計算方式為標準差除以平均數，用來比較相對波動；若平均數接近 0，解讀需更保守。', formatCv(etfStats.cv), formatCv(indexStats.cv)]
     ].map((row) => `
       <tr>
         <td>${row[0]}</td>
         <td>${row[1]}</td>
         <td>${row[2]}</td>
+        <td>${row[3]}</td>
       </tr>
     `).join('');
 
@@ -1118,6 +1229,15 @@
       </article>
     `).join('');
 
+    document.getElementById('eventTable').innerHTML = eventRows.map((item) => `
+      <tr>
+        <td>${item.date}</td>
+        <td>${item.focus}</td>
+        <td>${item.label}</td>
+        <td>${item.event}</td>
+      </tr>
+    `).join('');
+
     const lineTheme = {
       paper_bgcolor: 'rgba(0,0,0,0)',
       plot_bgcolor: '#fffdfa',
@@ -1162,7 +1282,7 @@
         name: '0050',
         opacity: 0.72,
         marker: { color: assetConfig.etf.color, line: { color: '#fffdfa', width: 1 } },
-        xbins: { start: freq.min, end: freq.max, size: freq.width },
+        xbins: { start: globalFrequencyStart, end: globalFrequencyEnd, size: frequencyWidth },
         hovertemplate: '0050 區間: %{x:.2%}<br>次數: %{y}<extra></extra>'
       },
       {
@@ -1171,7 +1291,7 @@
         name: '臺灣加權指數',
         opacity: 0.58,
         marker: { color: assetConfig.index.color, line: { color: '#fffdfa', width: 1 } },
-        xbins: { start: freq.min, end: freq.max, size: freq.width },
+        xbins: { start: globalFrequencyStart, end: globalFrequencyEnd, size: frequencyWidth },
         hovertemplate: '加權指數區間: %{x:.2%}<br>次數: %{y}<extra></extra>'
       }
     ], {
@@ -1279,19 +1399,6 @@
         <p>${item.text}</p>
       </article>
     `).join('');
-
-    const diversificationText = corr > 0.8
-      ? '兩者共同變動相當明顯，若只在這兩者之間配置，分散效果通常有限。'
-      : '兩者仍有共同變動，但同步程度未達完全一致，因此理論上仍可能保留部分分散效果。';
-
-    const extremeMonthText = commonOutlierMonths.length > 0
-      ? `依箱型圖離群值與絕對報酬率觀察，較值得注意的極端月份包括 ${commonOutlierMonths.slice(0, 4).map((row) => row.date).join('、')}。`
-      : '本資料未出現明顯離群值月份，但仍可從最大與最小報酬率判斷高波動時段。';
-
-    document.getElementById('narrative').innerHTML = `
-      <p>根據本期間資料，若以中位數與算術平均月報酬率觀察，${typicalWinner === '0050' ? '<span class="accent">0050</span>' : '<span class="accent-2">臺灣加權指數</span>'}的典型月報酬略高；若以標準差衡量波動，${volatilityWinner === '0050' ? '<span class="accent">0050</span>' : '<span class="accent-2">臺灣加權指數</span>'}的波動較大，表示其單月漲跌幅度相對更明顯。再比較算術平均報酬率與幾何平均報酬率，兩者都存在差距，顯示月報酬率波動會對長期複利結果造成拖累，而${meanGapWinner}的差距較大，也代表其波動對長期平均成長率的影響更值得注意。</p>
-      <p>${extremeMonthText} 這些月份通常伴隨市場急跌急彈，因此在報告中可視為風險說明的重點。另一方面，兩資產月報酬率的相關係數為 <span class="accent-2">${corr.toFixed(3)}</span>，屬於${correlationLabel(corr)}，表示它們在多數月份傾向同向變動。${diversificationText} 如果以理財專員、基金經理人或企業退休基金管理者的角度說明，較適合向客戶或主管表示：根據本期間資料，0050 與大盤整體走勢高度連動，0050 可作為市場代表性資產的近似觀察工具，但在風險管理上仍需留意極端月份與波動擴大的期間，而不應把這些統計結果直接解讀為未來績效保證或買賣建議。</p>
-    `;
   </script>
 </body>
 </html>
