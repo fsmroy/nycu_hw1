@@ -467,7 +467,7 @@
               </div>
             </div>
             <div class="notes" id="freqNotes"></div>
-            <div class="formula-box" id="sturgesExplanation"></div>
+           
           </article>
 
           <article class="chart-card half">
@@ -959,32 +959,27 @@
       '2022/6/30': {
         focus: '雙資產明顯下跌',
         label: '0050 -10.79% / 加權 -11.79%',
-        event: '6 月經濟部電價費率審議會決議調升部分產業電價 15%，疊加升息與通膨壓力，市場對企業成本與景氣前景較為保守。'
+        event: '2022年6月台股因美國聯準會暴力升息3碼，引發台美利差擴大與外資瘋狂外逃提款，導致大盤指數雪崩式大跌，6 月經濟部電價費率審議會決議調升部分產業電價 15%，疊加升息與通膨壓力，市場對企業成本與景氣前景較為保守。'
       },
       '2022/9/30': {
         focus: '雙資產再度下跌',
         label: '0050 -12.04% / 加權 -11.07%',
-        event: '9 月台東 6.8 強震造成社會關注，同期市場仍受全球升息與風險趨避情緒影響，台股波動擴大。'
+        event: '美國聯準會再度暴力升息3碼且態度極度鷹派，引發台美利差擴大與新台幣劇烈貶值，導致外資瘋狂提款並撤資。'
       },
       '2022/11/30': {
         focus: '雙資產強勁反彈',
         label: '0050 +17.49% / 加權 +14.90%',
-        event: '11 月台美 21 世紀貿易倡議首次談判，加上地方選舉結果落底後不確定性下降，市場情緒較前期改善。'
+        event: '美國通膨降溫使升息預期放緩，加上巴菲特砸重金買進台積電，引發外資認錯並瘋狂回流。'
       },
       '2024/3/29': {
         focus: '電子權值題材帶動上漲',
         label: '0050 +10.10% / 加權 +7.00%',
         event: '3 月市場持續聚焦台灣半導體與 AI 伺服器供應鏈題材，權值股帶動指數創高，0050 漲幅相對更突出。'
       },
-      '2024/6/28': {
-        focus: '大型股延續強勢',
-        label: '0050 +12.31% / 加權 +8.78%',
-        event: '6 月市場仍以 AI 與高階半導體供應鏈為主軸，電子權值股強勢推升 ETF 與大盤同步上行。'
-      },
       '2025/3/31': {
         focus: '雙資產同步重挫',
         label: '0050 -10.25% / 加權 -10.23%',
-        event: '3 月台灣社會面上有美國與台積電投資議題升溫，市場同時面對國際科技產業評價修正，月報酬率轉為明顯負向。'
+        event: '美國對等關稅因引發全球貿易戰恐慌與供應鏈成本飆升，導致投資人信心崩潰而引發股市全面大跌，3 月台灣社會面上有美國與台積電投資議題升溫，市場同時面對國際科技產業評價修正，月報酬率轉為明顯負向。'
       },
       '2026/3/31': {
         focus: '戰爭衝擊下的雙資產下跌',
@@ -1136,12 +1131,7 @@
       </article>
     `).join('');
 
-    document.getElementById('sturgesExplanation').innerHTML = `
-      <strong>為什麼使用 5% 組距？</strong><br>
-      在金融月報酬率分析中，5% 是常見且容易解讀的寬度，因為它足以區分「明顯下跌、近乎持平、溫和上漲、強勁上漲」等波動層級，同時不會把區間切得過細，造成每組次數太零碎。<br><br>
-      <strong>Sturges 法則是什麼？</strong><br>
-      Sturges 法則建議組數約為 1 + log2(n)。本資料有效樣本數為 ${validRows.length}，估計組數約為 ${sturgesBins} 組。若以兩資產共同全距 ${formatPct(globalFrequencyEnd - globalFrequencyStart, 2)} 來看，平均每組寬度大約是 ${formatPct((globalFrequencyEnd - globalFrequencyStart) / sturgesBins, 2)}，與 5% 非常接近，所以本頁改用固定 5% 組距，兼顧理論參考與實務解讀便利性。`
-      ;
+   
 
     document.getElementById('statsTable').innerHTML = [
       ['Mean', '月報酬率的算術平均數，計算方式為所有月報酬率加總後除以月份數。', formatPct(etfStats.mean), formatPct(indexStats.mean)],
@@ -1376,29 +1366,7 @@
       ]
     }, { responsive: true });
 
-    document.getElementById('chartNotes').innerHTML = [
-      {
-        title: '極端月份',
-        text: `依絕對報酬率觀察，0050 最明顯的月份包含 ${topEtfMoves.map((item) => `${item.date}（${formatPct(item.value)}）`).join('、')}。`
-      },
-      {
-        title: '大盤波動月份',
-        text: `臺灣加權指數的主要波動月份包含 ${topIndexMoves.map((item) => `${item.date}（${formatPct(item.value)}）`).join('、')}。`
-      },
-      {
-        title: '箱型圖判讀',
-        text: `${volatilityWinner}的四分位區間與整體分散程度較大，表示在本期間內月報酬率波動相對更明顯。`
-      },
-      {
-        title: '缺漏值說明',
-        text: `本資料只有 ${mergedRows[0].date} 因缺少前一期價格而沒有月報酬率；其餘有效月份已納入圖表與統計。`
-      }
-    ].map((item) => `
-      <article class="note">
-        <strong>${item.title}</strong>
-        <p>${item.text}</p>
-      </article>
-    `).join('');
+
   </script>
 </body>
 </html>
