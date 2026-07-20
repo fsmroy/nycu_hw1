@@ -294,6 +294,39 @@
       grid-column: span 6;
     }
 
+    .chart-card.wide {
+      grid-column: span 8;
+    }
+
+    .chart-card.narrow {
+      grid-column: span 4;
+    }
+
+    .freq-card {
+      padding-right: 18px;
+    }
+
+    #freqNotes {
+      margin: -6px 0 10px;
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.45;
+    }
+
+    #freqNotes p {
+      margin: 0;
+    }
+
+    #freqNotes p:last-child {
+      margin-bottom: 0;
+    }
+
+    #freqNotes strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
     .chart-card h3 {
       margin: 0 0 8px;
       font-size: 20px;
@@ -339,11 +372,20 @@
       .chart-card.half {
         grid-column: span 12;
       }
+
+      .chart-card.wide,
+      .chart-card.narrow {
+        grid-column: span 12;
+      }
     }
 
     @media (max-width: 720px) {
       .page {
         padding: 18px 14px 36px;
+      }
+
+      #freqNotes {
+        margin: -2px 0 10px;
       }
 
       .hero,
@@ -445,9 +487,10 @@
             <p class="table-caption">事件欄位是依當月或鄰近期間的台灣重大事件與市場主題整理，僅用於對照可能的市場情緒背景，不表示事件與報酬率之間存在因果關係。</p>
           </article>
 
-          <article class="chart-card">
+          <article class="chart-card wide freq-card">
             <h3>0050 與臺灣加權指數月報酬率次數分配比較</h3>
             <p>兩個資產都使用固定 5% 組距，讓同一個區間可直接並列比較。這樣比只做單一資產表更容易看出哪個資產在正負報酬區間的集中程度不同。</p>
+            <div class="notes" id="freqNotes"></div>
             <div class="table-grid">
               <div class="table-wrap">
                 <table>
@@ -466,42 +509,31 @@
                 </table>
               </div>
             </div>
-            <div class="notes" id="freqNotes"></div>
-           
           </article>
 
-          <article class="chart-card half">
+          <article class="chart-card narrow">
             <h3>月報酬率直方圖</h3>
             <p>直方圖同樣採 5% 組距，能和上方次數分配表維持一致，方便直接對照表格與圖形。</p>
             <div id="histChart" class="chart"></div>
           </article>
 
-          <article class="chart-card half">
+          <article class="chart-card  half">
             <h3>兩資產箱型圖</h3>
             <p>箱型圖比較中位數、四分位距與異常值，適合觀察哪一個資產的波動較大。</p>
             <div id="boxChart" class="chart"></div>
           </article>
 
-          <article class="chart-card half">
-            <h3>月報酬率散佈圖</h3>
-            <p>散佈圖與相關係數搭配使用，用來描述共同變動方向與強弱，但不推論因果。</p>
-            <div id="scatterChart" class="chart"></div>
-          </article>
-        </div>
-        <div class="notes" id="chartNotes"></div>
-      </section>
-
-      <section class="panel" id="section4">
-        <h2>4. 第三章：描述統計量</h2>
+          <article class="chart-card  half">
+            <h2>描述統計量</h2>
         <p class="section-intro">
-          下表依月報酬率分別計算算術平均數、中位數、標準差、四分位數、全距、幾何平均報酬率與變異係數，用來比較兩資產的典型表現與波動程度。
+          依月報酬率分別計算算術平均數、中位數、標準差、四分位數、全距、幾何平均報酬率與變異係數，用來比較兩資產的典型表現與波動程度。
         </p>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
                 <th>指標</th>
-                <th>涵義與計算方式</th>
+                <th style="display: none;">涵義與計算方式</th>
                 <th>0050</th>
                 <th>臺灣加權指數</th>
               </tr>
@@ -510,16 +542,25 @@
           </table>
         </div>
         <div class="summary-grid" style="margin-top: 16px;" id="statsHighlights"></div>
+          </article>
+
+          <article class="chart-card half">
+            <h3>月報酬率散佈圖</h3>
+            <p>散佈圖與相關係數搭配使用，用來描述共同變動方向與強弱，但不推論因果。</p>
+            <div id="scatterChart" class="chart"></div>
+          </article>
+
+          <article class="chart-card half">
+            <h3>相關係數分析</h3>
+            <p>將相關係數與散佈圖並排，方便同時觀察點群分布與數值解讀，確認兩資產的同步程度。</p>
+            <div class="summary-grid" id="corrCards"></div>
+            <div class="notes" id="corrNotes"></div>
+          </article>
+        </div>
+        <div class="notes" id="chartNotes"></div>
       </section>
 
-      <section class="panel split" id="section5">
-        <h2>5. 相關係數分析</h2>
-        <p class="section-intro">
-          相關係數反映兩個月報酬率序列是否傾向同向變動，以及同步程度高低；它只能說明共同變動，不能直接推論其中一者造成另一者變動。
-        </p>
-        <div class="summary-grid" id="corrCards"></div>
-        <div class="notes" id="corrNotes"></div>
-      </section>
+
 
     </main>
   </div>
@@ -1110,26 +1151,21 @@
     document.getElementById('freqNotes').innerHTML = [
       {
         title: '組距',
-        text: '組距是把月報酬率切成一段一段的區間。本頁固定每一組寬度為 5%，例如 -5% 至 0%、0% 至 5%，方便直接比較兩個資產在相同波動區間的分布。'
+        text: '以每 5% 為一組，方便兩資產用同一區間比較。'
       },
       {
         title: '次數',
-        text: '次數代表有多少個月份的月報酬率落在該組距內。若某區間次數高，表示該報酬區間在樣本期間較常出現。'
+        text: '落在該組距的月份數。'
       },
       {
         title: '相對次數',
-        text: '相對次數等於次數除以總樣本數，表示某個報酬區間所占比例。它比單看次數更適合拿來比較不同資產的分布集中程度。'
+        text: '該組距月份數占全部樣本的比例。'
       },
       {
         title: '累積百分比',
-        text: '累積百分比是把各組的相對次數從最小組距一路加總到目前組距，用來觀察某一報酬門檻以下已累積多少月份。'
+        text: '從最小組距累加到目前組距的比例。'
       }
-    ].map((item) => `
-      <article class="note">
-        <strong>${item.title}</strong>
-        <p>${item.text}</p>
-      </article>
-    `).join('');
+    ].map((item) => `<p><strong>${item.title}</strong>：${item.text}</p>`).join('');
 
    
 
@@ -1148,7 +1184,7 @@
     ].map((row) => `
       <tr>
         <td>${row[0]}</td>
-        <td>${row[1]}</td>
+        <td style="display: none">${row[1]}</td>
         <td>${row[2]}</td>
         <td>${row[3]}</td>
       </tr>
@@ -1288,7 +1324,14 @@
       ...lineTheme,
       barmode: 'overlay',
       xaxis: { ...lineTheme.xaxis, title: '月報酬率', tickformat: '.0%' },
-      yaxis: { ...lineTheme.yaxis, title: '月份數', tickformat: undefined }
+      yaxis: { ...lineTheme.yaxis, title: '月份數', tickformat: undefined },
+      legend: {
+        orientation: 'h',    // 設定為水平排列
+        x: 0.5,              // 置中對齊 (0是左, 1是右)
+        y: -0.2,             // 移到 X 軸下方 (負值代表圖表框架下方)
+        xanchor: 'center',   // 以圖例本身的中心點對齊 x: 0.5
+        yanchor: 'top'       // 以圖例本身的頂部對齊 y: -0.2
+      }
     }, { responsive: true });
 
     Plotly.newPlot('boxChart', [
@@ -1313,7 +1356,8 @@
     ], {
       ...lineTheme,
       xaxis: { ...lineTheme.xaxis, title: '資產' },
-      yaxis: { ...lineTheme.yaxis, title: '月報酬率' }
+      yaxis: { ...lineTheme.yaxis, title: '月報酬率' },
+      height: 700 
     }, { responsive: true });
 
     Plotly.newPlot('scatterChart', [{
